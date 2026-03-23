@@ -17,7 +17,8 @@ router.post('/login', async (req, res) => {
     
         if(!parsed.success) { // if inavalid object is passed.
             const formattedMessage = parsed.error.issues.map((err) => ({err: err.message, path: err.path[0]}));
-            return res.status(422).json({
+            return res.json({
+                status: 422,
                 msg: 'Invalid authentication object.',
                 err: formattedMessage
             });
@@ -27,25 +28,27 @@ router.post('/login', async (req, res) => {
         const existingUser = await User.findOne({ email: email });
 
         if(!existingUser) {
-            return res.status(404).json({ msg: `Invalid Email ${email} not found.`});
+            return res.json({ status: 404, msg: `Invalid Email ${email} not found.`});
         }
 
         const isValidPassword = await comparePassword(password, existingUser.password);
         if(!isValidPassword) {
-            return res.status(404).json({ msg: `Invalid Password for ${email}.` });
+            return res.json({ status: 404, msg: `Invalid Password for ${email}.`});
         }
 
         const token = await signToken({id: existingUser._id, email: existingUser.email}); 
 
         await User.findByIdAndUpdate(existingUser._id, {loginToken: token});
 
-        return res.status(200).json({
+        return res.json({
+            status: 200,
             msg: 'Authentication Successfull.',
-            token: token
+            loginToken: token
         });
         
     } catch(err) {
-        return res.status(500).json({
+        return res.json({
+            status: 500,
             msg: 'Internal Server Error.'
         })
     }
@@ -54,7 +57,8 @@ router.post('/login', async (req, res) => {
 });
 
 router.get('/login', (req, res) => {
-    res.status(200).json({
+    res.json({
+        status: 200,
         msg: 'Login Route is active.',
         healthStatus: 'healthy'
     });

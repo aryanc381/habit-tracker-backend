@@ -18,7 +18,8 @@ router.post('/signup', async (req, res) => {
 
         if(!parsed.success) {
             const formattedMessage = parsed.error.issues.map((err) => ({message: err.message, path: err.path[0]}));
-            return res.status(422).json({
+            return res.json({
+                status: 422,
                 msg: 'Missing / Invalid Authentication Object.',
                 err: formattedMessage
             });
@@ -28,7 +29,8 @@ router.post('/signup', async (req, res) => {
 
         const existingUser = await User.findOne({ email: email });
         if(existingUser) {
-            return res.status(409).json({
+            return res.json({
+                status: 409,
                 msg: `${email} already exists, try again with a different email.`
             });
         }
@@ -37,14 +39,16 @@ router.post('/signup', async (req, res) => {
 
         const newUser = await User.create({ email: email, password: encryptPassword, fullName: fullName, createdAt: new Date() });
 
-        return res.status(200).json({
+        return res.json({
+            status: 200,
             msg: `${email} created successfully.`,
             fullName: newUser.fullName,
             email: newUser.email,
             password: newUser.password
         });
     } catch(err) {
-        res.status(500).json({
+        res.json({
+            status: 500,
             msg: 'Internal Server Error.',
             err: err
         });
@@ -52,7 +56,8 @@ router.post('/signup', async (req, res) => {
 });
 
 router.get('/signup', async (req, res) => {
-    return res.status(200).json({
+    return res.json({
+        status: 200,
         msg: 'Singup Route is active.',
         healthStatus: 'healthy'
     });
